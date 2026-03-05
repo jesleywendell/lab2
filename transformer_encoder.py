@@ -17,9 +17,31 @@ embedding_table = np.random.randn(vocab_size, d_model)
 X = embedding_table[ids]
 X = X[np.newaxis, :, :]
 
+def softmax(x):
+    e_x = np.exp(x - np.max(x, axis=-1, keepdims=True))
+    return e_x / e_x.sum(axis=-1, keepdims=True)
+
+
+def scaled_dot_product_attention(X, W_q, W_k, W_v):
+    Q = X @ W_q
+    K = X @ W_k
+    V = X @ W_v
+
+    d_k = Q.shape[-1]
+    scores = (Q @ K.transpose(0, 2, 1)) / np.sqrt(d_k)
+    weights = softmax(scores)
+    return weights @ V
+
+
+W_q = np.random.randn(d_model, d_model)
+W_k = np.random.randn(d_model, d_model)
+W_v = np.random.randn(d_model, d_model)
+
+X_att = scaled_dot_product_attention(X, W_q, W_k, W_v)
+
 print("Vocabulary:")
 print(vocab_df)
 print(f"\nSentence: {frase}")
 print(f"IDs: {ids}")
 print(f"\nInput tensor X shape: {X.shape}")
-print("(BatchSize, SequenceLength, d_model)")
+print(f"Attention output shape: {X_att.shape}")
