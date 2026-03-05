@@ -33,15 +33,22 @@ def scaled_dot_product_attention(X, W_q, W_k, W_v):
     return weights @ V
 
 
+def layer_norm(x, eps=1e-6):
+    mean = np.mean(x, axis=-1, keepdims=True)
+    var = np.var(x, axis=-1, keepdims=True)
+    return (x - mean) / np.sqrt(var + eps)
+
+
 W_q = np.random.randn(d_model, d_model)
 W_k = np.random.randn(d_model, d_model)
 W_v = np.random.randn(d_model, d_model)
 
 X_att = scaled_dot_product_attention(X, W_q, W_k, W_v)
+X_norm1 = layer_norm(X + X_att)
 
 print("Vocabulary:")
 print(vocab_df)
 print(f"\nSentence: {frase}")
 print(f"IDs: {ids}")
 print(f"\nInput tensor X shape: {X.shape}")
-print(f"Attention output shape: {X_att.shape}")
+print(f"After Add & LayerNorm: {X_norm1.shape}")
