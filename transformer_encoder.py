@@ -39,16 +39,30 @@ def layer_norm(x, eps=1e-6):
     return (x - mean) / np.sqrt(var + eps)
 
 
+def feed_forward(x, W1, b1, W2, b2):
+    hidden = np.maximum(0, x @ W1 + b1)
+    return hidden @ W2 + b2
+
+
+d_ff = d_model * 4
+
 W_q = np.random.randn(d_model, d_model)
 W_k = np.random.randn(d_model, d_model)
 W_v = np.random.randn(d_model, d_model)
+W1 = np.random.randn(d_model, d_ff)
+b1 = np.zeros(d_ff)
+W2 = np.random.randn(d_ff, d_model)
+b2 = np.zeros(d_model)
 
 X_att = scaled_dot_product_attention(X, W_q, W_k, W_v)
 X_norm1 = layer_norm(X + X_att)
+X_ffn = feed_forward(X_norm1, W1, b1, W2, b2)
+X_out = layer_norm(X_norm1 + X_ffn)
 
 print("Vocabulary:")
 print(vocab_df)
 print(f"\nSentence: {frase}")
 print(f"IDs: {ids}")
 print(f"\nInput tensor X shape: {X.shape}")
-print(f"After Add & LayerNorm: {X_norm1.shape}")
+print(f"FFN output shape: {X_ffn.shape}")
+print(f"Encoder layer output shape: {X_out.shape}")
